@@ -61,22 +61,27 @@ class WeeklyRecurringTest < Minitest::Test
     assert_equal ends.to_s, r.events[-1].to_s
   end
 
-  test "uses interval" do
-    starts = Date.parse("2008-09-21")
-    r = recurrence(
-      :every    => :week,
-      :on       => starts.wday,
-      :interval => 2,
-      :starts   => starts,
-      :until    => "2009-01-01"
-    )
-    assert_equal "2008-09-21", r.events[0].to_s
-    assert_equal "2008-10-05", r.events[1].to_s
-    assert_equal "2008-10-19", r.events[2].to_s
-    assert_equal "2008-11-02", r.events[3].to_s
-    assert_equal "2008-11-16", r.events[4].to_s
-    assert_equal "2008-11-30", r.events[5].to_s
-    assert_equal "2008-12-14", r.events[6].to_s
+  test "uses interval on any weekday" do
+    puts ""
+    [*0..6].each do |dow|
+      initial_offset = dow
+      date = initial_offset.days.from_now.beginning_of_day
+      r = recurrence(
+        :every    => :week,
+        :on       => date.wday,
+        :interval => 2,
+        :starts   => date.beginning_of_day,
+        :until    => date + 6.weeks
+      )
+      # puts "Beginning: #{date.to_date}, a #{date.strftime("%A")}, offset: #{initial_offset}, through #{date + 6.weeks}"
+      # puts "First event date: #{r.events[0].to_date}"
+      # r.events.each {|d| puts d.to_s }
+      assert_equal date, r.events[0]
+      assert_equal (date + 2.weeks).to_date, r.events[1]
+      assert_equal (date + 4.weeks).to_date, r.events[2]
+      assert_equal (date + 6.weeks).to_date, r.events[3]
+      assert_equal 4, r.events.size
+    end
   end
 
   test "uses repeat" do
